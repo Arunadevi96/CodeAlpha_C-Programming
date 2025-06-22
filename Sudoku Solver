@@ -1,0 +1,102 @@
+#include <iostream>
+using namespace std;
+
+const int N = 9; // Size of the Sudoku grid (9x9)
+
+// Function to print the Sudoku grid
+void printGrid(int grid[N][N]) {
+    cout << "\nSolved Sudoku Grid:\n";
+    for (int row = 0; row < N; row++) {
+        for (int col = 0; col < N; col++) {
+            cout << grid[row][col] << " ";
+        }
+        cout << endl;
+    }
+}
+// Function to check if it's safe to place num at grid[row][col]
+bool isSafe(int grid[N][N], int row, int col, int num) {
+    // Check the row
+    for (int x = 0; x < N; x++)
+        if (grid[row][x] == num)
+            return false;
+
+    // Check the column
+    for (int x = 0; x < N; x++)
+        if (grid[x][col] == num)
+            return false;
+
+    // Check the 3x3 subgrid
+    int startRow = row - row % 3;
+    int startCol = col - col % 3;
+
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            if (grid[i + startRow][j + startCol] == num)
+                return false;
+
+    return true;
+}
+
+// Backtracking function to solve Sudoku
+bool solveSudoku(int grid[N][N]) {
+    int row = -1, col = -1;
+    bool isEmpty = false;
+
+    // Find the next empty cell (represented by 0)
+    for (int i = 0; i < N && !isEmpty; i++) {
+        for (int j = 0; j < N; j++) {
+            if (grid[i][j] == 0) {
+                row = i;
+                col = j;
+                isEmpty = true;
+                break;
+            }
+        }
+    }
+
+    // If no empty cell is found, puzzle is solved
+    if (!isEmpty)
+        return true;
+
+    // Try placing numbers 1 to 9 in the empty cell
+    for (int num = 1; num <= 9; num++) {
+        if (isSafe(grid, row, col, num)) {
+            grid[row][col] = num;
+
+            // Recur to solve rest of the grid
+            if (solveSudoku(grid))
+                return true;
+
+            // Backtrack
+            grid[row][col] = 0;
+        }
+    }
+
+    return false; // Trigger backtracking
+}
+
+int main() {
+    int grid[N][N];
+
+    // Step 1: Take input from user
+    cout << "Enter the Sudoku puzzle (9x9), use 0 for empty cells:\n";
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            cin >> grid[i][j];
+            if (grid[i][j] < 0 || grid[i][j] > 9) {
+                cout << "Invalid input! Please enter numbers between 0 and 9.\n";
+                return 1;
+            }
+        }
+    }
+
+    // Step 2: Solve using backtracking
+    if (solveSudoku(grid)) {
+        // Step 3: Display the solved grid
+        printGrid(grid);
+    } else {
+        cout << "No solution exists for the given Sudoku puzzle.\n";
+    }
+
+    return 0;
+}
